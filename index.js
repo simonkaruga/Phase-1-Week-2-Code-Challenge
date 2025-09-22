@@ -1,0 +1,1 @@
+//Dom Reader Function

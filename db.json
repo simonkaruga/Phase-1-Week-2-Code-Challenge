@@ -1,0 +1,8 @@
+{
+  "characters": [
+    { "id": 1, "name": "Mr. Fluffykins", "image": "https://placekitten.com/200/200", "votes": 0 },
+    { "id": 2, "name": "Bubbles", "image": "https://place-puppy.com/200x200", "votes": 0 },
+    { "id": 3, "name": "Chirpy", "image": "https://placebear.com/200/200", "votes": 0 }
+  ]
+}
+	

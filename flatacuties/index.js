@@ -1,17 +1,17 @@
 document.addEventListener('DOMContentLoaded', () => {
     const animalList = document.getElementById('animal-list');
     const animalDetail = document.getElementById('animal-details');
+    const baseURL = 'http://localhost:3000/characters';
     console.log('Flatacuties app loaded!');
 
-
-    fetch('http://localhost:3000/characters')
+    fetch(baseURL)
         .then(response => response.json())
         .then(characters => {
             characters.forEach(animal => renderAnimalName(animal));
         })
         .catch(error => console.error("Error fetching animals:", error));
 
-    
+  
     function renderAnimalName(animal) {
         const nameElement = document.createElement('p');
         nameElement.textContent = animal.name;
@@ -38,18 +38,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const voteButton = document.createElement('button');
         voteButton.textContent = 'Vote for me!';
         voteButton.addEventListener('click', () => {
-            animal.votes += 1;
-            votesElement.textContent = `Votes: ${animal.votes}`;
+            updateVotes(animal, animal.votes + 1, votesElement);
         });
 
         const resetButton = document.createElement('button');
         resetButton.textContent = 'Reset votes';
         resetButton.addEventListener('click', () => {
-            animal.votes = 0;
-            votesElement.textContent = `Votes: ${animal.votes}`;
+            updateVotes(animal, 0, votesElement);
         });
 
-        
         const voteForm = document.createElement('form');
         voteForm.innerHTML = `
             <input type="number" min="1" placeholder="Enter votes" required>
@@ -61,8 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const input = voteForm.querySelector('input');
             const addedVotes = parseInt(input.value, 10);
             if (!isNaN(addedVotes) && addedVotes > 0) {
-                animal.votes += addedVotes;
-                votesElement.textContent = `Votes: ${animal.votes}`;
+                updateVotes(animal, animal.votes + addedVotes, votesElement);
                 input.value = '';
             }
         });
@@ -74,4 +70,50 @@ document.addEventListener('DOMContentLoaded', () => {
         animalDetail.appendChild(resetButton);
         animalDetail.appendChild(voteForm);
     }
+
+    function updateVotes(animal, newVotes, votesElement) {
+        fetch(`${baseURL}/${animal.id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ votes: newVotes })
+        })
+        .then(res => res.json())
+        .then(updatedAnimal => {
+            animal.votes = updatedAnimal.votes;
+            votesElement.textContent = `Votes: ${updatedAnimal.votes}`;
+        })
+        .catch(err => console.error("Error updating votes:", err));
+    }
+
+ 
+    const addAnimalForm = document.getElementById('add-animal-form');
+
+    addAnimalForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const nameInput = document.getElementById('animal-name');
+        const imageInput = document.getElementById('animal-image');
+
+        const newAnimal = {
+            name: nameInput.value.trim(),
+            image: imageInput.value.trim(),
+            votes: 0
+        };
+
+        fetch(baseURL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newAnimal)
+        })
+        .then(res => res.json())
+        .then(createdAnimal => {
+        
+            renderAnimalName(createdAnimal);
+           
+            showAnimalDetail(createdAnimal);
+           
+            addAnimalForm.reset();
+        })
+        .catch(err => console.error("Error adding new animal:", err));
+    });
 });
